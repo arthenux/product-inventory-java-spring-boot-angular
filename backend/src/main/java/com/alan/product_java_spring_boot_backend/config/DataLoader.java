@@ -3,27 +3,59 @@ package com.alan.product_java_spring_boot_backend.config;
 import com.alan.product_java_spring_boot_backend.product.Product;
 import com.alan.product_java_spring_boot_backend.product.ProductCategory;
 import com.alan.product_java_spring_boot_backend.product.ProductRepository;
+import com.alan.product_java_spring_boot_backend.user.AppUser;
+import com.alan.product_java_spring_boot_backend.user.UserRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class DataLoader implements CommandLineRunner {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final String seedUserEmail;
+    private final String seedUserPassword;
 
-    public DataLoader(ProductRepository productRepository) {
+    public DataLoader(
+            ProductRepository productRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${app.seed.user.email:}") String seedUserEmail,
+            @Value("${app.seed.user.password:}") String seedUserPassword
+    ) {
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.seedUserEmail = seedUserEmail;
+        this.seedUserPassword = seedUserPassword;
     }
 
     @Override
     public void run(String... args) {
-        if (productRepository.count() > 0) {
+        seedProducts();
+        seedUser();
+    }
+
+    private void seedProducts() {
+        if (productRepository.count() == 0) {
+            productRepository.saveAll(sampleProducts());
+        }
+    }
+
+    private void seedUser() {
+        if (!StringUtils.hasText(seedUserEmail) || !StringUtils.hasText(seedUserPassword)) {
             return;
         }
 
-        productRepository.saveAll(sampleProducts());
+        if (!userRepository.existsByEmail(seedUserEmail)) {
+            userRepository.save(new AppUser(seedUserEmail, passwordEncoder.encode(seedUserPassword)));
+        }
     }
 
     private List<Product> sampleProducts() {

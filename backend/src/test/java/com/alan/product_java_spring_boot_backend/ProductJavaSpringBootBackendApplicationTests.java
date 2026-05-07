@@ -7,16 +7,22 @@ import com.alan.product_java_spring_boot_backend.auth.LoginResponse;
 import com.alan.product_java_spring_boot_backend.product.ProductRepository;
 import com.alan.product_java_spring_boot_backend.user.AppUser;
 import com.alan.product_java_spring_boot_backend.user.UserRepository;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -82,6 +88,84 @@ class ProductJavaSpringBootBackendApplicationTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.tokenType").value("Bearer"))
 				.andExpect(jsonPath("$.email").value("test-user@example.com"));
+	}
+
+	@Test
+	void rejectsProductRequestsWithoutJwt() throws Exception {
+		mockMvc.perform(get("/api/products").contextPath("/api"))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void listsProductsWithJwt() throws Exception {
+		mockMvc.perform(get("/api/products")
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(10));
+	}
+
+	@Test
+	void createsUpdatesAndDeletesProductWithJwt() throws Exception {
+		MvcResult createResult = mockMvc.perform(post("/api/products")
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(productJson("Logitech Brio 4K Webcam", "Logitech", "CAM-LOG-BRIO4K", "SMART_HOME")))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.name").value("Logitech Brio 4K Webcam"))
+				.andExpect(jsonPath("$.sku").value("CAM-LOG-BRIO4K"))
+				.andReturn();
+
+		Integer productId = JsonPath.read(createResult.getResponse().getContentAsString(), "$.id");
+
+		mockMvc.perform(put("/api/products/{id}", productId)
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(productJson("Logitech Brio 4K Ultra HD Webcam", "Logitech", "CAM-LOG-BRIO4K", "SMART_HOME")))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Logitech Brio 4K Ultra HD Webcam"));
+
+		mockMvc.perform(delete("/api/products/{id}", productId)
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader()))
+				.andExpect(status().isNoContent());
+
+		mockMvc.perform(get("/api/products/{id}", productId)
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader()))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void rejectsDuplicateSku() throws Exception {
+		mockMvc.perform(post("/api/products")
+						.contextPath("/api")
+						.header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(productJson("Duplicate TV", "Samsung", "TV-SAM-OLED55", "TV_AND_HOME_CINEMA")))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.message").value("Product SKU already exists: TV-SAM-OLED55"));
+	}
+
+	private String authorizationHeader() {
+		LoginResponse response = authService.login(new LoginRequest("test-user@example.com", "test-password"));
+		return "Bearer " + response.token();
+	}
+
+	private String productJson(String name, String brand, String sku, String category) {
+		return """
+				{
+				  "name": "%s",
+				  "brand": "%s",
+				  "sku": "%s",
+				  "category": "%s",
+				  "price": 149.99,
+				  "stockQuantity": 7,
+				  "description": "A product created by the secured API test."
+				}
+				""".formatted(name, brand, sku, category);
 	}
 
 }

@@ -2,7 +2,7 @@
 
 A full-stack product inventory application built with Java, Spring Boot, Angular, MySQL, and JWT authentication.
 
-The project currently includes a secured Spring Boot backend with database-backed users, JWT login, seeded product data, and protected Product CRUD endpoints. The Angular frontend is scaffolded and will be expanded in the next stages.
+The project currently includes a secured Spring Boot backend with database-backed users, JWT login, seeded product data, protected Product CRUD endpoints, and an Angular authentication shell with a login flow.
 
 ## Tech Stack
 
@@ -30,6 +30,9 @@ The project currently includes a secured Spring Boot backend with database-backe
 - Protected Product CRUD REST API.
 - CORS configuration for the Angular development server.
 - Automated backend tests using H2.
+- Angular application shell with protected routing.
+- Angular login page connected to the backend JWT endpoint.
+- Client-side JWT storage and automatic authorization header support.
 
 ## Project Structure
 
@@ -75,6 +78,12 @@ All product endpoints require a valid JWT bearer token.
 | `DELETE` | `/api/products/{id}` | Deletes a product. |
 
 ## Local Configuration
+
+Recommended local tooling:
+
+- Java 25
+- Node.js 20 LTS or newer LTS
+- MySQL 8
 
 The backend reads local-only settings from:
 
@@ -139,15 +148,42 @@ Current test coverage verifies:
 - Unauthorized access protection.
 - Authenticated Product list, create, update, delete, not-found, and duplicate SKU flows.
 
-## Frontend Status
+## Running the Frontend
 
-The Angular 20 frontend has been scaffolded and will be implemented in upcoming stages.
+The Angular frontend currently includes the application shell, login route, authenticated route guard, and an initial protected product workspace.
+
+From the frontend folder:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Frontend URL:
+
+```text
+http://localhost:4200
+```
+
+The frontend expects the backend API to be available at:
+
+```text
+http://localhost:8080/api
+```
+
+## Running Frontend Checks
+
+```bash
+cd frontend
+npm run build
+npx ng test --watch=false --browsers=ChromeHeadless
+```
+
+## Upcoming Frontend Work
 
 Planned frontend work:
 
-- Application shell and routing.
-- Login screen.
-- JWT storage and authenticated API service.
 - Product list view.
 - Product create and edit forms.
 - Delete workflow.
@@ -168,4 +204,5 @@ Planned frontend work:
 - Added Product persistence and sample data.
 - Added JWT authentication and seeded user support.
 - Added secured Product CRUD API.
-- Next: build the Angular authentication flow.
+- Added Angular authentication shell and login flow.
+- Next: build the Angular product management screens.

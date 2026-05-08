@@ -1,0 +1,40 @@
+<section class="login-layout">
+  <div class="intro-panel">
+    <p class="eyebrow">Inventory Control</p>
+    <h1>Sign in to manage the product catalog.</h1>
+    <p class="summary">
+      A secured workspace for maintaining product records, stock levels, pricing, and catalog data.
+    </p>
+
+    <div class="status-grid" aria-label="Platform status">
+      <span>JWT secured</span>
+      <span>MySQL backed</span>
+      <span>CRUD ready</span>
+    </div>
+  </div>
+
+  <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+    <div>
+      <p class="form-kicker">Authorized Access</p>
+      <h2>Welcome back</h2>
+    </div>
+
+    <label>
+      <span>Email address</span>
+      <input type="email" formControlName="email" autocomplete="username" />
+    </label>
+
+    <label>
+      <span>Password</span>
+      <input type="password" formControlName="password" autocomplete="current-password" />
+    </label>
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
+    </button>
+  </form>
+</section>

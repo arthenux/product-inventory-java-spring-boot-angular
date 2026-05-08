@@ -1,0 +1,57 @@
+.workspace {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.workspace-heading {
+  background: #ffffff;
+  border: 1px solid rgba(30, 54, 61, 0.12);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.eyebrow {
+  color: #2d6a5f;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1;
+  margin: 0.7rem 0 0;
+}
+
+.summary-strip {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.summary-strip div {
+  background: #ffffff;
+  border: 1px solid rgba(30, 54, 61, 0.12);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.2rem;
+}
+
+.summary-strip strong {
+  color: #183a49;
+  font-size: 1.8rem;
+}
+
+.summary-strip span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .summary-strip {
+    grid-template-columns: 1fr;
+  }
+}

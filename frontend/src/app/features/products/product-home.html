@@ -1,21 +1,138 @@
 <section class="workspace">
   <div class="workspace-heading">
-    <p class="eyebrow">Authenticated Workspace</p>
-    <h1>Product catalog</h1>
+    <div>
+      <p class="eyebrow">Authenticated Workspace</p>
+      <h1>Product catalog</h1>
+    </div>
+    <button class="secondary-button" type="button" (click)="loadProducts()">Refresh</button>
   </div>
 
   <div class="summary-strip" aria-label="Product workspace status">
     <div>
-      <strong>10</strong>
-      <span>Seeded products</span>
+      <strong>{{ products().length }}</strong>
+      <span>Products</span>
     </div>
     <div>
-      <strong>JWT</strong>
-      <span>Session active</span>
+      <strong>{{ totalStock() }}</strong>
+      <span>Units in stock</span>
     </div>
     <div>
-      <strong>CRUD</strong>
-      <span>API available</span>
+      <strong>{{ inventoryValue() | currency: 'GBP' : 'symbol' : '1.0-0' }}</strong>
+      <span>Inventory value</span>
     </div>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="notice error">{{ errorMessage() }}</p>
+  }
+
+  @if (successMessage()) {
+    <p class="notice success">{{ successMessage() }}</p>
+  }
+
+  <div class="product-layout">
+    <section class="product-table-panel" aria-label="Products">
+      <div class="panel-heading">
+        <h2>Products</h2>
+        <button class="primary-button" type="button" (click)="startCreate()">New product</button>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-row">Loading products...</div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of products(); track product.id) {
+                <tr [class.selected]="selectedProduct()?.id === product.id">
+                  <td>
+                    <strong>{{ product.name }}</strong>
+                    <span>{{ product.brand }}</span>
+                  </td>
+                  <td>{{ product.sku }}</td>
+                  <td>{{ categoryLabel(product.category) }}</td>
+                  <td>{{ product.price | currency: 'GBP' }}</td>
+                  <td>{{ product.stockQuantity }}</td>
+                  <td>
+                    <div class="row-actions">
+                      <button type="button" (click)="editProduct(product)">Edit</button>
+                      <button class="danger-button" type="button" (click)="deleteProduct(product)">
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <aside class="form-panel" aria-label="Product form">
+      <div class="panel-heading">
+        <h2>{{ selectedProduct() ? 'Edit product' : 'Create product' }}</h2>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="saveProduct()">
+        <label>
+          <span>Name</span>
+          <input type="text" formControlName="name" />
+        </label>
+
+        <label>
+          <span>Brand</span>
+          <input type="text" formControlName="brand" />
+        </label>
+
+        <label>
+          <span>SKU</span>
+          <input type="text" formControlName="sku" />
+        </label>
+
+        <label>
+          <span>Category</span>
+          <select formControlName="category">
+            @for (category of categories; track category.value) {
+              <option [value]="category.value">{{ category.label }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label>
+            <span>Price</span>
+            <input type="number" min="0.01" step="0.01" formControlName="price" />
+          </label>
+
+          <label>
+            <span>Stock</span>
+            <input type="number" min="0" step="1" formControlName="stockQuantity" />
+          </label>
+        </div>
+
+        <label>
+          <span>Description</span>
+          <textarea rows="5" formControlName="description"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" [disabled]="isSaving()">
+            {{ isSaving() ? 'Saving...' : selectedProduct() ? 'Save changes' : 'Create product' }}
+          </button>
+          <button class="secondary-button" type="button" (click)="startCreate()">Clear</button>
+        </div>
+      </form>
+    </aside>
   </div>
 </section>

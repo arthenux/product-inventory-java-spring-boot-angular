@@ -33,6 +33,7 @@ The project currently includes a secured Spring Boot backend with database-backe
 - Angular application shell with protected routing.
 - Angular login page connected to the backend JWT endpoint.
 - Client-side JWT storage and automatic authorization header support.
+- Angular product management screen connected to the secured Product CRUD API.
 
 ## Project Structure
 
@@ -150,7 +151,7 @@ Current test coverage verifies:
 
 ## Running the Frontend
 
-The Angular frontend currently includes the application shell, login route, authenticated route guard, and an initial protected product workspace.
+The Angular frontend currently includes the application shell, login route, authenticated route guard, and product management workspace.
 
 From the frontend folder:
 
@@ -180,14 +181,22 @@ npm run build
 npx ng test --watch=false --browsers=ChromeHeadless
 ```
 
+Current frontend product features:
+
+- Authenticated product list.
+- Product create form.
+- Product edit flow.
+- Product delete action.
+- Inventory summary metrics.
+
 ## Upcoming Frontend Work
 
 Planned frontend work:
 
-- Product list view.
-- Product create and edit forms.
-- Delete workflow.
-- Professional responsive styling.
+- Product search and filtering.
+- Refined loading and empty states.
+- Form-level validation messages.
+- Professional README updates for frontend and backend folders.
 
 ## Security Notes
 
@@ -205,4 +214,5 @@ Planned frontend work:
 - Added JWT authentication and seeded user support.
 - Added secured Product CRUD API.
 - Added Angular authentication shell and login flow.
-- Next: build the Angular product management screens.
+- Added Angular product management screens.
+- Next: refine the product experience and project documentation.
